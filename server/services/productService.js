@@ -42,6 +42,8 @@ class ProductService {
   async getProductsByCategory(category) {
     try {
       const response = await axios.get(`${this.baseURL}/products/category/${category}`);
+      console.log(response.data)
+
       return response.data;
     } catch (error) {
       console.error(`Error fetching products in category ${category}:`, error);
@@ -51,7 +53,7 @@ class ProductService {
 
   async getAllCategories() {
     try {
-      const response = await axios.get(`${this.baseURL}/products/categories`);
+      const response = await axios.get(`${this.baseURL}/products/category-list`);
       return response.data;
     } catch (error) {
       console.error('Error fetching categories:', error);

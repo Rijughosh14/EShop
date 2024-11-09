@@ -1,15 +1,13 @@
-// client/src/pages/ProductListing.jsx
 import React, { useState } from 'react';
 import { useQuery } from 'react-query';
 import { productApi } from '../api/api';
 import ProductCard from '../components/ProductCard';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
 export default function ProductListing() {
-  const [filters, setFilters] = useState({
-    priceRange: 'all',
-    sortBy: 'default'
-  });
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('default');
 
   // Fetch all products
   const { data, isLoading, error } = useQuery(
@@ -27,66 +25,108 @@ export default function ProductListing() {
   // Ensure data exists and has a products array
   const products = data?.products || [];
 
-  // Filter products by price range if applied
-  const filteredProducts = products.filter(product => {
-    if (filters.priceRange !== 'all') {
-      const [min, max] = filters.priceRange.split('-').map(Number);
-      if (product.price < min || product.price > max) return false;
-    }
-    return true;
-  });
+  // Filter and sort products based on selected option
+  const processProducts = () => {
+    let result = [...products];
 
-  // Sort products based on selected criteria
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    switch (filters.sortBy) {
+    switch (activeFilter) {
+      case 'price-0-50':
+        return result.filter(p => p.price <= 50);
+      case 'price-51-100':
+        return result.filter(p => p.price > 50 && p.price <= 100);
+      case 'price-101-200':
+        return result.filter(p => p.price > 100 && p.price <= 200);
+      case 'price-201-plus':
+        return result.filter(p => p.price > 200);
       case 'price-low':
-        return a.price - b.price;
+        return result.sort((a, b) => a.price - b.price);
       case 'price-high':
-        return b.price - a.price;
-      case 'name':
-        return a.title.localeCompare(b.title);
+        return result.sort((a, b) => b.price - a.price);
+      case 'name-az':
+        return result.sort((a, b) => a.title.localeCompare(b.title));
+      case 'name-za':
+        return result.sort((a, b) => b.title.localeCompare(a.title));
       default:
-        return 0;
+        return result;
     }
-  });
+  };
+
+  const sortedAndFilteredProducts = processProducts();
+
+  const filterOptions = [
+    { label: 'All Products', value: 'default' },
+    { label: '──── Price Filters ────', value: 'divider1', isDivider: true },
+    { label: 'Under $50', value: 'price-0-50' },
+    { label: '$51 - $100', value: 'price-51-100' },
+    { label: '$101 - $200', value: 'price-101-200' },
+    { label: 'Over $200', value: 'price-201-plus' },
+    { label: '──── Sort Options ────', value: 'divider2', isDivider: true },
+    { label: 'Price: Low to High', value: 'price-low' },
+    { label: 'Price: High to Low', value: 'price-high' },
+    { label: 'Name: A to Z', value: 'name-az' },
+    { label: 'Name: Z to A', value: 'name-za' }
+  ];
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Filters */}
-      <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <select
-          className="input-field"
-          value={filters.priceRange}
-          onChange={(e) => setFilters({ ...filters, priceRange: e.target.value })}
+      {/* Enhanced Filter Dropdown */}
+      <div className="mb-8 relative">
+        <button
+          onClick={() => setIsFilterOpen(!isFilterOpen)}
+          className="w-full md:w-64 px-4 py-3 bg-white border border-gray-200 rounded-lg shadow-sm 
+                     hover:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-200 
+                     transition-all duration-200 flex items-center justify-between"
         >
-          <option value="all">All Prices</option>
-          <option value="0-50">$0 - $50</option>
-          <option value="51-100">$51 - $100</option>
-          <option value="101-200">$101 - $200</option>
-          <option value="201-500">$201 - $500</option>
-        </select>
+          <span className="text-gray-700">
+            {filterOptions.find(opt => opt.value === activeFilter)?.label || 'Filter & Sort'}
+          </span>
+          <ChevronDownIcon 
+            className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
+              isFilterOpen ? 'transform rotate-180' : ''
+            }`}
+          />
+        </button>
 
-        <select
-          className="input-field"
-          value={filters.sortBy}
-          onChange={(e) => setFilters({ ...filters, sortBy: e.target.value })}
-        >
-          <option value="default">Default Sorting</option>
-          <option value="price-low">Price: Low to High</option>
-          <option value="price-high">Price: High to Low</option>
-          <option value="name">Name: A to Z</option>
-        </select>
+        {/* Dropdown Menu */}
+        {isFilterOpen && (
+          <div className="absolute z-10 w-full md:w-64 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+            {filterOptions.map((option, index) => (
+              option.isDivider ? (
+                <div 
+                  key={option.value} 
+                  className="px-4 py-2 bg-gray-50 text-sm text-gray-500 font-medium"
+                >
+                  {option.label}
+                </div>
+              ) : (
+                <button
+                  key={option.value}
+                  onClick={() => {
+                    setActiveFilter(option.value);
+                    setIsFilterOpen(false);
+                  }}
+                  className={`w-full px-4 py-2 text-left hover:bg-primary-50 transition-colors duration-150
+                    ${activeFilter === option.value ? 'bg-primary-50 text-primary-600' : 'text-gray-700'}
+                    ${index === 0 ? 'rounded-t-lg' : ''}
+                    ${index === filterOptions.length - 1 ? 'rounded-b-lg' : ''}`}
+                >
+                  {option.label}
+                </button>
+              )
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Products Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {sortedProducts.map(product => (
+        {sortedAndFilteredProducts.map(product => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
 
       {/* No Results */}
-      {sortedProducts.length === 0 && (
+      {sortedAndFilteredProducts.length === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-500 text-xl">No products found matching your criteria</p>
         </div>

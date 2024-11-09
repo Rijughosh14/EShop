@@ -1,46 +1,3 @@
-// // client/src/api/api.js
-// import axios from 'axios';
-
-// const API_BASE_URL = 'http://localhost:5000/api';
-
-// const api = axios.create({
-//   baseURL: API_BASE_URL,
-//   headers: {
-//     'Content-Type': 'application/json',
-//   },
-// });
-
-// export const fetchProducts = async () => {
-//   const { data } = await api.get('/products');
-//   return data;
-// };
-
-// export const fetchFeaturedProducts = async () => {
-//   const { data } = await api.get('/products');
-//   return data.filter(product => product.featured);
-// };
-
-// export const fetchProductById = async (id) => {
-//   const { data } = await api.get(`/products/${id}`);
-//   return data;
-// };
-
-// export const createOrder = async (orderData) => {
-//   const { data } = await api.post('/orders', orderData);
-//   return data;
-// };
-
-// // Error handling interceptor
-// api.interceptors.response.use(
-//   response => response,
-//   error => {
-//     console.error('API Error:', error);
-//     throw error;
-//   }
-// );
-
-
-
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
@@ -80,7 +37,7 @@ export const productApi = {
 
   // Get all categories
   getAllCategories: async () => {
-    const response = await api.get('/products/categories');
+    const response = await api.get('/products/categories/all');
     return response.data;
   },
   //checking out
@@ -120,7 +77,8 @@ export const useCategories = () => {
     'categories',
     productApi.getAllCategories,
     {
-      staleTime: 24 * 60 * 60 * 1000, // 24 hours
+      // staleTime: 24 * 60 * 60 * 1000, // 24 hours
+      // staleTime:0, // 24 hours
     }
   );
 }
