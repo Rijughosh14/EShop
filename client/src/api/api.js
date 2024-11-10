@@ -77,7 +77,7 @@ export const useCategories = () => {
     'categories',
     productApi.getAllCategories,
     {
-      // staleTime: 24 * 60 * 60 * 1000, // 24 hours
+      staleTime: 24 * 60 * 60 * 1000, // 24 hours
       // staleTime:0, // 24 hours
     }
   );

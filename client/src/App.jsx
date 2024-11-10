@@ -8,6 +8,8 @@ import ProductListing from './pages/ProductListing';
 import ProductDetail from './pages/ProductDetail';
 import Checkout from './pages/Checkout';
 import PaymentStatus from './pages/PaymentStatus';
+import CategoryProductListing from './pages/CategoryProductListing';
+
 
 export default function App() {
   return (
@@ -17,6 +19,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<ProductListing />} />
+          <Route path="/products/category/:id" element={<CategoryProductListing />} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/payment-status" element={<PaymentStatus />} />

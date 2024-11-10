@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ShoppingCartIcon, Bars3Icon, XMarkIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import { useCart } from '../context/CartContext';
 import { useCategories } from '../api/api';
@@ -9,6 +9,7 @@ export default function Header() {
   const [isCategoryBarVisible, setCategoryBarVisible] = useState(false);
   const { cart } = useCart();
   const { data: categories, isLoading } = useCategories();
+  const location = useLocation();
 
   const totalItems = cart.length;
 
@@ -16,13 +17,34 @@ export default function Header() {
     setCategoryBarVisible(!isCategoryBarVisible);
   };
 
+  const isActivePath = (path) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
+  };
+
+  const getLinkStyles = (path) => {
+    const baseStyles = "px-4 py-2 rounded-full transition-all duration-200 ease-in-out";
+    const activeStyles = "bg-primary-50 text-primary-600 font-medium";
+    const inactiveStyles = "text-gray-700 hover:bg-primary-50 hover:text-primary-600";
+    
+    return `${baseStyles} ${isActivePath(path) ? activeStyles : inactiveStyles}`;
+  };
+
+  const getMobileLinkStyles = (path) => {
+    const baseStyles = "block px-4 py-2 rounded-lg transition-all duration-200";
+    const activeStyles = "bg-primary-50 text-primary-600 font-medium";
+    const inactiveStyles = "text-gray-700 hover:bg-primary-50 hover:text-primary-600";
+    
+    return `${baseStyles} ${isActivePath(path) ? activeStyles : inactiveStyles}`;
+  };
+
   return (
     <div className="relative">
-      {/* Main Navigation */}
       <header className="bg-white shadow-md">
         <nav className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
-            {/* Logo */}
             <Link 
               to="/" 
               className="text-2xl font-bold text-primary-600 hover:text-primary-700 transition-colors"
@@ -30,19 +52,14 @@ export default function Header() {
               EShop
             </Link>
 
-            {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-6">
-              <Link 
-                to="/" 
-                className="px-4 py-2 rounded-full text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200 ease-in-out"
-              >
+              <Link to="/" className={getLinkStyles('/')}>
                 Home
               </Link>
               
-              {/* Categories Toggle Button */}
               <button
                 onClick={toggleCategories}
-                className="flex items-center space-x-1 px-4 py-2 rounded-full text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200 ease-in-out"
+                className={`flex items-center space-x-1 ${getLinkStyles('/products/category')}`}
               >
                 <span>Categories</span>
                 <ChevronDownIcon 
@@ -52,17 +69,13 @@ export default function Header() {
                 />
               </button>
 
-              <Link 
-                to="/products" 
-                className="px-4 py-2 rounded-full text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200 ease-in-out"
-              >
+              <Link to="/products" className={getLinkStyles('/products')}>
                 Products
               </Link>
               
-              {/* Cart Icon */}
               <Link 
                 to="/checkout" 
-                className="relative px-4 py-2 rounded-full text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200 ease-in-out"
+                className={`relative ${getLinkStyles('/checkout')}`}
               >
                 <div className="flex items-center">
                   <ShoppingCartIcon className="h-6 w-6" />
@@ -76,7 +89,6 @@ export default function Header() {
               </Link>
             </div>
 
-            {/* Mobile Menu Button */}
             <button
               className="md:hidden p-2 rounded-full hover:bg-gray-100 transition-colors"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -89,32 +101,30 @@ export default function Header() {
             </button>
           </div>
 
-          {/* Mobile Navigation */}
           {isMenuOpen && (
             <div className="md:hidden mt-4 space-y-2 pb-4">
               <Link
                 to="/"
-                className="block px-4 py-2 rounded-lg text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200"
+                className={getMobileLinkStyles('/')}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Home
               </Link>
               <Link
                 to="/products"
-                className="block px-4 py-2 rounded-lg text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200"
+                className={getMobileLinkStyles('/products')}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Products
               </Link>
               <Link
                 to="/checkout"
-                className="block px-4 py-2 rounded-lg text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200"
+                className={getMobileLinkStyles('/checkout')}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Cart ({totalItems})
               </Link>
               
-              {/* Mobile Categories */}
               <div className="mt-4">
                 <div className="px-4 font-medium text-gray-900 mb-2">Categories</div>
                 {isLoading ? (
@@ -125,8 +135,11 @@ export default function Header() {
                       <Link
                         key={category}
                         to={`/products/category/${category}`}
-                        className="block px-4 py-2 rounded-lg text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200"
-                        onClick={() => setIsMenuOpen(false)}
+                        className={getMobileLinkStyles(`/products/category/${category}`)}
+                        onClick={() => {
+                          toggleCategories();
+                          setIsMenuOpen(false);
+                        }}
                       >
                         {category}
                       </Link>
@@ -139,11 +152,9 @@ export default function Header() {
         </nav>
       </header>
 
-      {/* Categories Bar */}
       {isCategoryBarVisible && (
         <div className="bg-gray-50 shadow-sm">
           <div className="container mx-auto px-4 py-4">
-            {/* Desktop Categories */}
             <div className="hidden md:block">
               {isLoading ? (
                 <div className="text-gray-500">Loading...</div>
@@ -153,9 +164,12 @@ export default function Header() {
                     <Link
                       key={category}
                       to={`/products/category/${category}`}
-                      className="px-4 py-2 rounded-full bg-white text-gray-700 hover:bg-primary-50 hover:text-primary-600 
-                               shadow-sm hover:shadow transition-all duration-200 ease-in-out border border-gray-200 
-                               hover:border-primary-200"
+                      className={`px-4 py-2 rounded-full bg-white shadow-sm hover:shadow transition-all duration-200 
+                                ease-in-out border border-gray-200 hover:border-primary-200 
+                                ${isActivePath(`/products/category/${category}`) 
+                                  ? 'bg-primary-50 text-primary-600 font-medium border-primary-200' 
+                                  : 'text-gray-700 hover:bg-primary-50 hover:text-primary-600'}`}
+                      onClick={() => toggleCategories()}
                     >
                       {category}
                     </Link>

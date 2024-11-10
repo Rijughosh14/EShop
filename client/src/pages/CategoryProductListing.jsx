@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
 import { useQuery } from 'react-query';
+import { useParams } from 'react-router-dom';
 import { productApi } from '../api/api';
 import ProductCard from '../components/ProductCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
-export default function ProductListing() {
+export default function CategoryProductListing() {
+  const { id } = useParams(); // Get category ID from URL
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState('default');
 
-  // Fetch all products
+  // Fetch products by category
   const { data, isLoading, error } = useQuery(
-    'products',
-    () => productApi.getAllProducts(),
+    ['products', id],
+    () => productApi.getProductsByCategory(id), // Use the category ID
     {
       keepPreviousData: true,
       staleTime: 5 * 60 * 1000, // 5 minutes
@@ -69,7 +71,7 @@ export default function ProductListing() {
     <div className="container mx-auto px-4 py-8">
       {/* Header with Filter */}
       <div className="mb-8 flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-gray-800">Our Products</h1>
+        <h1 className="text-2xl font-semibold text-gray-800">Category Products</h1>
         
         {/* Filter Dropdown - Now Right Aligned */}
         <div className="relative">
