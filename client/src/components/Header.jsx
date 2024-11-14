@@ -1,20 +1,37 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { ShoppingCartIcon, Bars3Icon, XMarkIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { ShoppingCartIcon, Bars3Icon, XMarkIcon, ChevronDownIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useCart } from '../context/CartContext';
 import { useCategories } from '../api/api';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCategoryBarVisible, setCategoryBarVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const { cart } = useCart();
   const { data: categories, isLoading } = useCategories();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const totalItems = cart.length;
 
   const toggleCategories = () => {
     setCategoryBarVisible(!isCategoryBarVisible);
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSearch(e);
+    }
   };
 
   const isActivePath = (path) => {
@@ -44,13 +61,51 @@ export default function Header() {
     <div className="relative">
       <header className="bg-white shadow-md">
         <nav className="container mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
-            <Link 
-              to="/" 
-              className="text-2xl font-bold text-primary-600 hover:text-primary-700 transition-colors"
-            >
-              EShop
-            </Link>
+          <div className="flex flex-col md:flex-row md:items-center md:space-x-6">
+            <div className="flex items-center justify-between">
+              <Link 
+                to="/" 
+                className="text-2xl font-bold text-primary-600 hover:text-primary-700 transition-colors"
+              >
+                EShop
+              </Link>
+
+              <button
+                className="md:hidden p-2 rounded-full hover:bg-gray-100 transition-colors"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                {isMenuOpen ? (
+                  <XMarkIcon className="h-6 w-6" />
+                ) : (
+                  <Bars3Icon className="h-6 w-6" />
+                )}
+              </button>
+            </div>
+
+            <div className="relative mt-4 md:mt-0 md:flex-1 max-w-2xl">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Search products..."
+                  className="w-full pl-4 pr-10 py-2 border border-gray-200 rounded-full 
+                           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
+                           placeholder-gray-400 transition-all duration-200"
+                  aria-label="Search products"
+                />
+                <button
+                  onClick={handleSearch}
+                  type="button"
+                  className="absolute right-0 top-0 h-full px-4 flex items-center justify-center
+                           text-gray-400 hover:text-primary-600 transition-colors"
+                  aria-label="Search"
+                >
+                  <MagnifyingGlassIcon className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
 
             <div className="hidden md:flex items-center space-x-6">
               <Link to="/" className={getLinkStyles('/')}>
@@ -88,17 +143,6 @@ export default function Header() {
                 </div>
               </Link>
             </div>
-
-            <button
-              className="md:hidden p-2 rounded-full hover:bg-gray-100 transition-colors"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? (
-                <XMarkIcon className="h-6 w-6" />
-              ) : (
-                <Bars3Icon className="h-6 w-6" />
-              )}
-            </button>
           </div>
 
           {isMenuOpen && (

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from 'react-query';
+import { useLocation } from 'react-router-dom';
 import { productApi } from '../api/api';
 import ProductCard from '../components/ProductCard';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -8,11 +9,16 @@ import { ChevronDownIcon } from '@heroicons/react/24/outline';
 export default function ProductListing() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState('default');
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const searchQuery = searchParams.get('search');
 
-  // Fetch all products
+  // Fetch products based on search query or all products
   const { data, isLoading, error } = useQuery(
-    'products',
-    () => productApi.getAllProducts(),
+    ['products', searchQuery],
+    () => searchQuery 
+      ? productApi.searchProducts(searchQuery)
+      : productApi.getAllProducts(),
     {
       keepPreviousData: true,
       staleTime: 5 * 60 * 1000, // 5 minutes
@@ -69,7 +75,16 @@ export default function ProductListing() {
     <div className="container mx-auto px-4 py-8">
       {/* Header with Filter */}
       <div className="mb-8 flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-gray-800">Our Products</h1>
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-800">
+            {searchQuery ? 'Search Results' : 'Our Products'}
+          </h1>
+          {searchQuery && (
+            <p className="mt-2 text-gray-600">
+              Showing results for "{searchQuery}"
+            </p>
+          )}
+        </div>
         
         {/* Filter Dropdown - Now Right Aligned */}
         <div className="relative">
@@ -122,16 +137,28 @@ export default function ProductListing() {
       </div>
 
       {/* Products Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {sortedAndFilteredProducts.map(product => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
-
-      {/* No Results */}
-      {sortedAndFilteredProducts.length === 0 && (
+      {sortedAndFilteredProducts.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {sortedAndFilteredProducts.map(product => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      ) : (
         <div className="text-center py-12">
-          <p className="text-gray-500 text-xl">No products found matching your criteria</p>
+          {searchQuery ? (
+            <>
+              <p className="text-gray-500 text-xl mb-2">
+                No products found matching "{searchQuery}"
+              </p>
+              <p className="text-gray-400">
+                Try checking your spelling or using different keywords
+              </p>
+            </>
+          ) : (
+            <p className="text-gray-500 text-xl">
+              No products found matching your criteria
+            </p>
+          )}
         </div>
       )}
     </div>
