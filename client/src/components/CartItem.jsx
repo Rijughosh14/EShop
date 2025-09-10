@@ -1,10 +1,10 @@
 // client/src/components/CartItem.jsx
 import React from 'react';
 import { XMarkIcon, MinusIcon, PlusIcon } from '@heroicons/react/24/outline';
-import { useCart } from '../context/CartContext';
+import { useAuthCart } from '../hooks/useAuthCart';
 
 export default function CartItem({ item }) {
-  const { updateQuantity, removeFromCart } = useCart();
+  const { updateQuantity, removeFromCart } = useAuthCart();
 
   const handleQuantityChange = (newQuantity) => {
     if (newQuantity < 1) {

@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
+import { useAuthCart } from '../hooks/useAuthCart';
+import { useSelector } from 'react-redux';
+import { selectIsAuthenticated } from '../features/auth/authSelectors';
 
 export default function ProductCard({ product }) {
-  const { addToCart } = useCart();
+  const { addToCart } = useAuthCart();
+  const isAuthenticated = useSelector(selectIsAuthenticated);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
   // Handle next and previous image
@@ -56,10 +59,15 @@ export default function ProductCard({ product }) {
         <div className="flex justify-between items-center">
           <span className="text-xl font-bold">${product.price}</span>
           <button
-            onClick={() => addToCart({ ...product, quantity: 1 })}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            onClick={() => addToCart(product, 1)}
+            className={`px-4 py-2 rounded-md transition-colors duration-200 ${
+              isAuthenticated 
+                ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                : 'bg-gray-400 text-white cursor-not-allowed'
+            }`}
+            title={!isAuthenticated ? 'Login required to add to cart' : 'Add to cart'}
           >
-            Add to Cart
+            {isAuthenticated ? 'Add to Cart' : 'Login to Add'}
           </button>
         </div>
       </div>

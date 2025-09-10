@@ -1,9 +1,9 @@
 import React from 'react';
 import { TrashIcon } from '@heroicons/react/24/outline';
-import { useCart } from '../context/CartContext';
+import { useAuthCart } from '../hooks/useAuthCart';
 
 export default function OrderSummary() {
-  const { cart, cartTotal, removeFromCart, updateQuantity } = useCart();
+  const { cart, cartTotal, removeFromCart, updateQuantity } = useAuthCart();
 
   const shippingCost = cartTotal > 100 ? 0 : 10;
   const tax = cartTotal * 0.1; // 10% tax

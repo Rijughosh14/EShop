@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useProduct } from '../api/api';
-import { useCart } from '../context/CartContext';
+import { useAuthCart } from '../hooks/useAuthCart';
+import { useSelector } from 'react-redux';
+import { selectIsAuthenticated } from '../features/auth/authSelectors';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function ProductDetail() {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const { addToCart, buyNow } = useAuthCart();
+  const isAuthenticated = useSelector(selectIsAuthenticated);
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -18,12 +20,11 @@ export default function ProductDetail() {
   if (!product) return <div>Product not found</div>;
 
   const handleAddToCart = () => {
-    addToCart({ ...product }, quantity); // Pass quantity as an argument
+    addToCart({ ...product }, quantity);
   };
 
   const handleBuyNow = () => {
-    addToCart({ ...product }, quantity); // Pass quantity as an argument
-    navigate('/checkout');
+    buyNow({ ...product }, quantity);
   };
 
   const handleNextImage = () => {
@@ -87,11 +88,27 @@ export default function ProductDetail() {
           </div>
 
           <div className="flex space-x-4">
-            <button onClick={handleAddToCart} className="btn-primary flex-1">
-              Add to Cart
+            <button 
+              onClick={handleAddToCart} 
+              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors duration-200 ${
+                isAuthenticated 
+                  ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                  : 'bg-gray-400 text-white cursor-not-allowed'
+              }`}
+              title={!isAuthenticated ? 'Login required to add to cart' : 'Add to cart'}
+            >
+              {isAuthenticated ? 'Add to Cart' : 'Login to Add'}
             </button>
-            <button onClick={handleBuyNow} className="btn-secondary flex-1">
-              Buy Now
+            <button 
+              onClick={handleBuyNow} 
+              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors duration-200 ${
+                isAuthenticated 
+                  ? 'bg-green-600 text-white hover:bg-green-700' 
+                  : 'bg-gray-400 text-white cursor-not-allowed'
+              }`}
+              title={!isAuthenticated ? 'Login required to buy now' : 'Buy now'}
+            >
+              {isAuthenticated ? 'Buy Now' : 'Login to Buy'}
             </button>
           </div>
 

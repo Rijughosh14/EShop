@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
+import { useAuthCart } from '../hooks/useAuthCart';
 import CheckoutForm from '../components/CheckoutForm';
 import OrderSummary from '../components/OrderSummary';
 import { productApi } from '../api/api'; // Import productApi for the Checkout function
@@ -8,7 +8,7 @@ import { toast } from 'react-hot-toast';
 
 export default function Checkout() {
   const navigate = useNavigate();
-  const { cart, cartTotal, clearCart } = useCart();
+  const { cart, cartTotal, clearCart } = useAuthCart();
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleSubmit = async (formData) => {

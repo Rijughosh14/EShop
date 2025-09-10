@@ -1,19 +1,39 @@
-// client/src/components/LoadingSpinner.jsx
 import React from 'react';
 
-export default function LoadingSpinner() {
+const LoadingSpinner = ({ size = 'md', className = '' }) => {
+  const sizeClasses = {
+    sm: 'h-4 w-4',
+    md: 'h-8 w-8',
+    lg: 'h-12 w-12',
+    xl: 'h-16 w-16'
+  };
+
   return (
-    <div className="flex items-center justify-center min-h-[200px]">
-      <div className="relative">
-        {/* Outer circle */}
-        <div className="w-12 h-12 rounded-full border-4 border-primary-200 animate-spin">
-        </div>
-        {/* Inner circle - creates the spinner effect */}
-        <div className="absolute top-0 left-0 w-12 h-12 rounded-full border-4 border-primary-600 
-                      border-t-transparent animate-spin">
-        </div>
+    <div className={`flex justify-center items-center ${className}`}>
+      <div
+        className={`animate-spin rounded-full border-2 border-gray-300 border-t-primary-600 ${sizeClasses[size]}`}
+        role="status"
+        aria-label="Loading"
+      >
+        <span className="sr-only">Loading...</span>
       </div>
-      <span className="ml-3 text-gray-600 text-lg">Loading...</span>
     </div>
   );
-}
+};
+
+// Full page loading spinner
+export const FullPageSpinner = () => (
+  <div className="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
+    <div className="text-center">
+      <LoadingSpinner size="xl" />
+      <p className="mt-4 text-gray-600">Loading...</p>
+    </div>
+  </div>
+);
+
+// Inline loading spinner for buttons
+export const ButtonSpinner = ({ size = 'sm' }) => (
+  <LoadingSpinner size={size} className="mr-2" />
+);
+
+export default LoadingSpinner;
