@@ -218,7 +218,9 @@ export default function Header() {
               
               <button
                 onClick={toggleCategories}
-                className={`flex items-center space-x-1 ${getLinkStyles('/category')}`}
+                disabled={location.pathname.startsWith('/categories')}
+                className={`flex items-center space-x-1 ${getLinkStyles('/category')} ${location.pathname.startsWith('/categories') ? 'opacity-50 cursor-not-allowed' : ''}`}
+                title={location.pathname.startsWith('/categories') ? 'Already viewing categories' : ''}
               >
                 <span>Categories</span>
                 <ChevronDownIcon 
@@ -336,7 +338,8 @@ export default function Header() {
                 <div className="relative">
                   <button
                     onClick={toggleMobileCategories}
-                    className={`w-full flex items-center justify-between ${getMobileLinkStyles('/categories')}`}
+                    disabled={location.pathname.startsWith('/categories')}
+                    className={`w-full flex items-center justify-between ${getMobileLinkStyles('/categories')} ${location.pathname.startsWith('/categories') ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     <span>Categories</span>
                     <ChevronDownIcon 
