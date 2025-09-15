@@ -8,6 +8,7 @@ import ProductDetail from './pages/ProductDetail';
 import Checkout from './pages/Checkout';
 import PaymentStatus from './pages/PaymentStatus';
 import CategoryProductListing from './pages/CategoryProductListing';
+import Profile from './pages/Profile';
 import { LoginPage, SignupPage } from './pages/Auth';
 import {useDispatch, useSelector} from 'react-redux'
 import { validateToken } from './features/auth/authThunk';
@@ -87,6 +88,7 @@ export default function App() {
         <Route path="/products" element={<ProductListing />} />
         <Route path="/category/:id" element={<CategoryProductListing />} />
         <Route path="/product/:id" element={<ProductDetail />} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
         <Route path="/payment-status" element={<ProtectedRoute><PaymentStatus /></ProtectedRoute>} />
       </Routes>
