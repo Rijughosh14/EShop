@@ -1,17 +1,22 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthCart } from '../hooks/useAuthCart';
+import { useCart } from '../context/CartContext';
 import { useSelector } from 'react-redux';
 import { selectIsAuthenticated } from '../features/auth/authSelectors';
-import { HeartIcon, ShoppingBagIcon } from '@heroicons/react/24/outline';
+import { HeartIcon, ShoppingBagIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 
 export default function ProductCard({ product }) {
   const { addToCart } = useAuthCart();
+  const { cart } = useCart();
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  
+  // Check if product is already in cart
+  const isInCart = cart.some(item => item.id === product.id);
   
   // Handle next and previous image
   const handleNextImage = () => {
@@ -35,7 +40,9 @@ export default function ProductCard({ product }) {
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    addToCart(product, 1);
+    if (!isInCart) {
+      addToCart(product, 1);
+    }
   };
 
   return (
@@ -95,21 +102,34 @@ export default function ProductCard({ product }) {
           <div className="absolute bottom-3 left-3 right-3">
             <button
               onClick={handleAddToCart}
-              disabled={!isAuthenticated}
+              disabled={!isAuthenticated || isInCart}
               className={`w-full py-2 px-4 rounded-xl font-medium text-sm transition-all duration-200 ${
-                isAuthenticated 
-                  ? 'bg-neutral-900 text-white hover:bg-neutral-800 active:scale-95' 
-                  : 'bg-neutral-300 text-neutral-500 cursor-not-allowed'
+                !isAuthenticated
+                  ? 'bg-neutral-300 text-neutral-500 cursor-not-allowed'
+                  : isInCart
+                  ? 'bg-green-600 text-white cursor-not-allowed'
+                  : 'bg-neutral-900 text-white hover:bg-neutral-800 active:scale-95'
               }`}
-              title={!isAuthenticated ? 'Login required to add to cart' : 'Add to cart'}
+              title={
+                !isAuthenticated 
+                  ? 'Login required to add to cart' 
+                  : isInCart 
+                  ? 'Item is already in your cart' 
+                  : 'Add to cart'
+              }
             >
-              {isAuthenticated ? (
+              {!isAuthenticated ? (
+                'Login to Add'
+              ) : isInCart ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <CheckIcon className="h-4 w-4" />
+                  <span>In Cart</span>
+                </div>
+              ) : (
                 <div className="flex items-center justify-center space-x-2">
                   <ShoppingBagIcon className="h-4 w-4" />
                   <span>Add to Cart</span>
                 </div>
-              ) : (
-                'Login to Add'
               )}
             </button>
           </div>
